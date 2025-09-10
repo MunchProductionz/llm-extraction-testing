@@ -98,7 +98,6 @@ def normalize_number(raw_value: Any, numeric_rounding_digits: Optional[int]) -> 
         return round(numeric_value, numeric_rounding_digits)
     return numeric_value
 
-
 def parse_date(raw_value: Any) -> Optional[date]:
     """Parse ISO date string to date object."""
     if raw_value is None:
@@ -109,6 +108,14 @@ def parse_date(raw_value: Any) -> Optional[date]:
         return datetime.fromisoformat(str(raw_value)).date()
     except Exception:
         return None
+
+def are_both_values_missing(predicted_value: Any, gold_value: Any) -> bool:
+    """Return True if both values are missing (None)."""
+    return predicted_value is None and gold_value is None
+
+def is_any_value_missing(predicted_value: Any, gold_value: Any) -> bool:
+    """Return True if either value is missing (None)."""
+    return (predicted_value is None) or (gold_value is None)
 
 
 def values_are_equal(predicted_value: Any, gold_value: Any, feature_rule: FeatureRule) -> bool:
@@ -121,7 +128,9 @@ def values_are_equal(predicted_value: Any, gold_value: Any, feature_rule: Featur
     if rule.feature_type == "number":
         predicted_number = normalize_number(predicted_value, rule.numeric_rounding_digits)
         gold_number = normalize_number(gold_value, rule.numeric_rounding_digits)
-        if predicted_number is None or gold_number is None:
+        if are_both_values_missing(predicted_number, gold_number):
+            return True
+        if is_any_value_missing(predicted_number, gold_number):
             return False
         if rule.numeric_absolute_tolerance is not None:
             if abs(predicted_number - gold_number) <= rule.numeric_absolute_tolerance:
@@ -133,7 +142,9 @@ def values_are_equal(predicted_value: Any, gold_value: Any, feature_rule: Featur
     if rule.feature_type == "date":
         predicted_date_value = parse_date(predicted_value)
         gold_date_value = parse_date(gold_value)
-        if predicted_date_value is None or gold_date_value is None:
+        if are_both_values_missing(predicted_date_value, gold_date_value):
+            return True
+        if is_any_value_missing(predicted_date_value, gold_date_value):
             return False
         if rule.date_tolerance_days is not None:
             return abs((predicted_date_value - gold_date_value).days) <= rule.date_tolerance_days
