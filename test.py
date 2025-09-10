@@ -20,26 +20,26 @@ from src.logger import RunLogger
 class ContractRecord(BaseModel):
     """Contract entity with multiple features for entity extraction tests."""
     contract_title: str
-    contract_amount: float
-    contract_date: str  # ISO date string
-    currency_code: str
+    contract_amount: Optional[float]
+    contract_date: Optional[str]  # ISO date string
+    currency_code: Optional[str]
     sector_name: Optional[str] = None  # optional metadata for slicing
 
 
 class ArticleFeaturesRecord(BaseModel):
     """Article with multiple features for multi-feature extraction tests."""
     row_identifier: int
-    headline_text: str
-    author_name: str
-    view_count: int
-    publish_date: str  # ISO date string
+    headline_text: Optional[str]
+    author_name: Optional[str]
+    view_count: Optional[int]
+    publish_date: Optional[str]  # ISO date string
     source_name: Optional[str] = None
 
 
 class ArticleLabelRecord(BaseModel):
     """Article with single classification label."""
     row_identifier: int
-    topic_label: str
+    topic_label: Optional[str]
     source_name: Optional[str] = None
 
 
@@ -305,8 +305,7 @@ def main() -> None:
     print(f"\nLog written to: {classification_log_path}")
 
     print("\nAll logs are available in ./logs")
-    print("Note: For date '', ensure your framework treats unparsable dates as None;")
-    print("      For numbers, Pydantic prevents '', so we test only None/value for numeric optional fields.")
+    
 
 if __name__ == "__main__":
     main()
