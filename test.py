@@ -61,6 +61,15 @@ def build_entity_extraction_gold() -> List[ContractRecord]:
         ContractRecord(contract_title="Consulting Deal Gamma",     contract_amount=75000.0,  contract_date=make_date_string(2), currency_code="USD", sector_name="Tech"),
         ContractRecord(contract_title="Distribution Pact Delta",   contract_amount=200000.0, contract_date=make_date_string(3), currency_code="NOK", sector_name="Retail"),
         ContractRecord(contract_title="Licensing Agreement Epsilon", contract_amount=150000.0, contract_date=make_date_string(4), currency_code="USD", sector_name="Energy"),
+        
+        # Number optional (gold None) — we will test predicted None and predicted value
+        ContractRecord(contract_title="Optional Amount Expected Empty - Case Predicted None",  contract_amount=None, contract_date=make_date_string(6), currency_code="USD"),
+        ContractRecord(contract_title="Optional Amount Expected Empty - Case Predicted Value", contract_amount=None, contract_date=make_date_string(7), currency_code="USD"),
+        
+        # Date optional (gold None) — we will test predicted None, predicted value, and predicted ""
+        ContractRecord(contract_title="Optional Date Expected Empty - Case Predicted None",   contract_amount=12345.0, contract_date=None, currency_code="USD"),
+        ContractRecord(contract_title="Optional Date Expected Empty - Case Predicted Value",  contract_amount=12346.0, contract_date=None, currency_code="USD"),
+        ContractRecord(contract_title="Optional Date Expected Empty - Case Predicted EmptyString", contract_amount=12347.0, contract_date=None, currency_code="USD"),
     ]
 
 
@@ -80,6 +89,18 @@ def build_entity_extraction_predictions() -> List[ContractRecord]:
         # Duplicate predictions competing for same gold
         ContractRecord(contract_title="Licensing Agreement Epsilon", contract_amount=150000.0, contract_date=make_date_string(4), currency_code="USD", sector_name="Energy"),
         ContractRecord(contract_title="Licensing Agreement Epsilon", contract_amount=149999.0, contract_date=make_date_string(4), currency_code="USD", sector_name="Energy"),
+        
+        # Number optional (gold None): predicted None → should be equal (if both-missing treated equal)
+        ContractRecord(contract_title="Optional Amount Expected Empty - Case Predicted None",  contract_amount=None, contract_date=make_date_string(6), currency_code="USD"),
+        # Number optional (gold None): predicted value → should be unequal
+        ContractRecord(contract_title="Optional Amount Expected Empty - Case Predicted Value", contract_amount=42.0, contract_date=make_date_string(7), currency_code="USD"),
+
+        # Date optional (gold None): predicted None → should be equal
+        ContractRecord(contract_title="Optional Date Expected Empty - Case Predicted None",   contract_amount=12345.0, contract_date=None, currency_code="USD"),
+        # Date optional (gold None): predicted value (a real date) → should be unequal
+        ContractRecord(contract_title="Optional Date Expected Empty - Case Predicted Value",  contract_amount=12346.0, contract_date=make_date_string(9), currency_code="USD"),
+        # Date optional (gold None): predicted empty string "" → parse to None, equal if both-missing treated equal
+        ContractRecord(contract_title="Optional Date Expected Empty - Case Predicted EmptyString", contract_amount=12347.0, contract_date="", currency_code="USD"),
     ]
 
 
@@ -90,6 +111,11 @@ def build_multi_feature_gold() -> List[ArticleFeaturesRecord]:
         ArticleFeaturesRecord(row_identifier=2, headline_text="Tech Giants Merge", author_name="Jane Doe", view_count=2500, publish_date=make_date_string(1), source_name="NewsNet"),
         ArticleFeaturesRecord(row_identifier=3, headline_text="Local Sports Win", author_name="A. Coach", view_count=400, publish_date=make_date_string(2), source_name="LocalDaily"),
         ArticleFeaturesRecord(row_identifier=4, headline_text="Economic Outlook", author_name="John Smith", view_count=800, publish_date=make_date_string(3), source_name="BizTimes"),
+        ArticleFeaturesRecord(row_identifier=5, headline_text="Optional View Count None - Case Predicted None", author_name="John Smith", view_count=None, publish_date=make_date_string(10), source_name="NewsNet"),
+        ArticleFeaturesRecord(row_identifier=6, headline_text="Optional View Count None - Case Predicted Value", author_name="Jane Doe",  view_count=None, publish_date=make_date_string(11), source_name="NewsNet"),
+        ArticleFeaturesRecord(row_identifier=7, headline_text="Optional Publish Date None - Case Predicted None",  author_name="A. Coach", view_count=100, publish_date=None, source_name="LocalDaily"),
+        ArticleFeaturesRecord(row_identifier=8, headline_text="Optional Publish Date None - Case Predicted Value", author_name="A. Coach", view_count=101, publish_date=None, source_name="LocalDaily"),
+        ArticleFeaturesRecord(row_identifier=9, headline_text="Optional Publish Date None - Case Predicted EmptyString", author_name="A. Coach", view_count=102, publish_date=None, source_name="LocalDaily"),
     ]
 
 
@@ -104,6 +130,18 @@ def build_multi_feature_predictions() -> List[ArticleFeaturesRecord]:
         ArticleFeaturesRecord(row_identifier=3, headline_text="Regional Sports Loss", author_name="Coach A.", view_count=460, publish_date=make_date_string(2), source_name="LocalDaily"),
         # Exact headline/author/numeric, date off by 2 days (will fail if tolerance=1)
         ArticleFeaturesRecord(row_identifier=4, headline_text="Economic Outlook", author_name="John Smith", view_count=800, publish_date=make_date_string(5), source_name="BizTimes"),
+        
+        # view_count gold None: predicted None → equal
+        ArticleFeaturesRecord(row_identifier=5, headline_text="Optional View Count None - Case Predicted None", author_name="John Smith", view_count=None, publish_date=make_date_string(10), source_name="NewsNet"),
+        # view_count gold None: predicted value → unequal
+        ArticleFeaturesRecord(row_identifier=6, headline_text="Optional View Count None - Case Predicted Value", author_name="Jane Doe",  view_count=777,  publish_date=make_date_string(11), source_name="NewsNet"),
+
+        # publish_date gold None: predicted None → equal
+        ArticleFeaturesRecord(row_identifier=7, headline_text="Optional Publish Date None - Case Predicted None",  author_name="A. Coach", view_count=100, publish_date=None, source_name="LocalDaily"),
+        # publish_date gold None: predicted concrete date → unequal
+        ArticleFeaturesRecord(row_identifier=8, headline_text="Optional Publish Date None - Case Predicted Value", author_name="A. Coach", view_count=101, publish_date=make_date_string(12), source_name="LocalDaily"),
+        # publish_date gold None: predicted "" → parse to None, equal if both-missing treated equal
+        ArticleFeaturesRecord(row_identifier=9, headline_text="Optional Publish Date None - Case Predicted EmptyString", author_name="A. Coach", view_count=102, publish_date="", source_name="LocalDaily"),
     ]
 
 
@@ -267,7 +305,8 @@ def main() -> None:
     print(f"\nLog written to: {classification_log_path}")
 
     print("\nAll logs are available in ./logs")
-
+    print("Note: For date '', ensure your framework treats unparsable dates as None;")
+    print("      For numbers, Pydantic prevents '', so we test only None/value for numeric optional fields.")
 
 if __name__ == "__main__":
     main()
