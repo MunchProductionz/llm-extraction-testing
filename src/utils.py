@@ -13,6 +13,7 @@ import numpy as np
 from pydantic import BaseModel, validator
 
 from src.config import FeatureRule
+from src.config import MISSING_LABEL_SENTINEL
 
 
 # =========================
@@ -63,6 +64,9 @@ def record_list_to_data_frame(record_list: List[BaseModel]) -> pd.DataFrame:
             rows.append(dict(record))
     return pd.DataFrame(rows)
 
+def normalize_label_for_metrics(value: Any) -> Any:
+    """Return a metrics-safe label (map None to a sentinel)."""
+    return MISSING_LABEL_SENTINEL if value is None else value
 
 def normalize_text(raw_value: str, casefold_text: bool, strip_text: bool, remove_punctuation: bool) -> str:
     """Normalize text by casefolding, stripping, and punctuation removal."""
@@ -85,15 +89,14 @@ def apply_alias_map(raw_value: Any, alias_map: Optional[Dict[str, str]]) -> Any:
         return raw_value
     return alias_map.get(str(raw_value), raw_value)
 
-
 def normalize_number(raw_value: Any, numeric_rounding_digits: Optional[int]) -> Any:
-    """Normalize numeric value via rounding if configured."""
+    """Normalize numeric value via rounding if configured; return None if parsing fails."""
     if raw_value is None or (isinstance(raw_value, float) and (math.isnan(raw_value) or math.isinf(raw_value))):
         return raw_value
     try:
         numeric_value = float(raw_value)
     except Exception:
-        return raw_value
+        return None  # treat unparsable (e.g., "") as missing
     if numeric_rounding_digits is not None:
         return round(numeric_value, numeric_rounding_digits)
     return numeric_value
