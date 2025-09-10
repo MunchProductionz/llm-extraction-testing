@@ -13,7 +13,7 @@ import numpy as np
 from pydantic import BaseModel, validator
 
 from src.models import ConfusionCounts
-
+from src.utils import normalize_label_for_metrics
 
 
 # =========================
@@ -68,38 +68,51 @@ def f1_from_counts(confusion_counts: ConfusionCounts) -> float:
         return 0.0
     return 2 * precision_value * recall_value / (precision_value + recall_value)
 
+def compute_multiclass_metrics(
+    gold_labels: List[Any],
+    predicted_labels: List[Any],
+    positive_label: Optional[str] = None
+) -> Dict[str, float]:
+    """Compute macro precision/recall/F1/specificity and micro accuracy (robust to None)."""
+    # Normalize labels so None becomes a comparable sentinel
+    gold_normalized = [normalize_label_for_metrics(v) for v in gold_labels]
+    predicted_normalized = [normalize_label_for_metrics(v) for v in predicted_labels]
 
-def compute_multiclass_metrics(gold_labels: List[Any], predicted_labels: List[Any], positive_label: Optional[str] = None) -> Dict[str, float]:
-    """Compute macro precision/recall/F1/specificity and micro accuracy."""
-    unique_label_set = sorted(set(list(gold_labels) + list(predicted_labels)))
-    if not unique_label_set:
+    # Build a deterministic, safely sortable label list
+    unique_label_list = sorted(set(gold_normalized + predicted_normalized), key=lambda x: str(x))
+
+    if not unique_label_list:
         return {"precision": 0.0, "recall": 0.0, "f1": 0.0, "specificity": 0.0, "micro_accuracy": 0.0}
 
-    per_class_metrics_list: List[Tuple[float, float, float, float]] = []
-    for label_value in unique_label_set:
-        counts = compute_confusion_counts_for_one_vs_rest(gold_labels, predicted_labels, label_value)
-        per_class_metrics_list.append((
+    # Per-class one-vs-rest
+    per_class_metrics = []
+    for label_value in unique_label_list:
+        counts = compute_confusion_counts_for_one_vs_rest(gold_normalized, predicted_normalized, label_value)
+        per_class_metrics.append((
             precision_from_counts(counts),
             recall_from_counts(counts),
             f1_from_counts(counts),
             specificity_from_counts(counts),
         ))
 
-    precision_macro = float(np.mean([m[0] for m in per_class_metrics_list]))
-    recall_macro = float(np.mean([m[1] for m in per_class_metrics_list]))
-    f1_macro = float(np.mean([m[2] for m in per_class_metrics_list]))
-    specificity_macro = float(np.mean([m[3] for m in per_class_metrics_list]))
-    micro_accuracy = float(np.mean([1 if g == p else 0 for g, p in zip(gold_labels, predicted_labels)]))
+    precision_macro = float(np.mean([m[0] for m in per_class_metrics]))
+    recall_macro    = float(np.mean([m[1] for m in per_class_metrics]))
+    f1_macro        = float(np.mean([m[2] for m in per_class_metrics]))
+    specificity_macro = float(np.mean([m[3] for m in per_class_metrics]))
+    micro_accuracy  = float(np.mean([1 if g == p else 0 for g, p in zip(gold_normalized, predicted_normalized)]))
 
-    if positive_label is not None and positive_label in unique_label_set:
-        counts_positive = compute_confusion_counts_for_one_vs_rest(gold_labels, predicted_labels, positive_label)
-        return {
-            "precision": precision_from_counts(counts_positive),
-            "recall": recall_from_counts(counts_positive),
-            "f1": f1_from_counts(counts_positive),
-            "specificity": specificity_from_counts(counts_positive),
-            "micro_accuracy": micro_accuracy,
-        }
+    # Optional binary report for a provided positive_label (normalize it too)
+    if positive_label is not None:
+        positive_label_normalized = normalize_label_for_metrics(positive_label)
+        if positive_label_normalized in unique_label_list:
+            counts = compute_confusion_counts_for_one_vs_rest(gold_normalized, predicted_normalized, positive_label_normalized)
+            return {
+                "precision":   precision_from_counts(counts),
+                "recall":      recall_from_counts(counts),
+                "f1":          f1_from_counts(counts),
+                "specificity": specificity_from_counts(counts),
+                "micro_accuracy": micro_accuracy,
+            }
 
     return {
         "precision": precision_macro,
