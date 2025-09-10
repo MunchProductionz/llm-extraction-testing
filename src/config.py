@@ -12,12 +12,6 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel, validator
 
-# ===========
-# Constants
-# ===========
-
-MISSING_LABEL_SENTINEL = "<<MISSING>>"
-
 
 # =========================
 # Enums and Config Models
