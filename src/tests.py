@@ -23,9 +23,8 @@ from src.utils import (
     parse_date,
     apply_alias_map,
     values_are_equal,
-    make_per_feature_metrics_data_frame,
-    make_total_metrics_data_frame,
 )
+from src.metrics import make_per_feature_metrics_data_frame, make_total_metrics_data_frame
 
 
 
