@@ -106,6 +106,63 @@ For entity detection (matching predicted entities to gold), we also report:
 
 > Specificity does not apply to entity presence (there is no “true negative entity” set in a standard way), but per-feature specificity is still computed on aligned pairs.
 
+## Visualization
+
+The package includes an optional matplotlib-based visualization helper in `extraction_testing.visualization`. It produces simple, typed figures from a `ResultBundle` (no seaborn, one chart per figure) and can also save a small PNG report.
+
+### Quick start
+
+```python
+from extraction_testing.visualization import (
+plot_total_metrics_bar,
+plot_per_feature_metrics_bar,
+plot_entity_presence_summary,
+save_all_charts_to_report,
+)
+
+
+# `result` is a ResultBundle from `orchestrator.evaluate(...)`
+fig1 = plot_total_metrics_bar(result)
+fig2 = plot_per_feature_metrics_bar(result, metric_name="f1")
+fig3 = plot_entity_presence_summary(result) # no-op note if summary missing
+
+
+paths = save_all_charts_to_report(result, "./_viz_out")
+print(paths)
+```
+
+### Available plotting functions
+
+| Function | Purpose |
+|---|---|
+| `plot_total_metrics_bar(result_bundle)` | Bar chart of total precision, recall, F1, specificity, micro accuracy, and row accuracy (if present). |
+| `plot_per_feature_metrics_bar(result_bundle, metric_name="f1")` | Per-feature bar chart for the selected metric; deterministic sorting. |
+| `plot_entity_presence_summary(result_bundle)` | Entity presence precision/recall/F1 (entity extraction only); shows a note if not available. |
+| `plot_confusion_matrix_for_classification(gold, pred, class_names)` | Confusion matrix heatmap for classification labels. |
+| `plot_metric_by_group(per_feature_df, group_col, metric_name)` | Optional helper to aggregate and visualize a metric by groups after you’ve joined group labels. |
+| `save_all_charts_to_report(result_bundle, output_dir)` | Saves a timestamped folder with standard charts and returns a mapping of chart→file path. |
+
+### Example script
+
+Run the example after installing the package:
+
+```python
+python examples/visualize_results.py
+```
+
+It writes PNGs to ./_viz_out. For an interactive demo, you can also try the Streamlit app:
+
+```python
+streamlit run examples/streamlit_app.py
+```
+
+### Notes
+
+- All figures use matplotlib defaults (no custom colors) and handle empty inputs by displaying a clear textual note.
+- The functions do not mutate global matplotlib state and close figures when saving reports.
+- Metric semantics match the testing framework (precision, recall, F1, specificity, micro accuracy); row accuracy is plotted if provided in the ResultBundle.
+
+
 ## Roadmap
 
 - Hungarian assignment as an alternate aligner for entity extraction.  
