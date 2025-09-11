@@ -12,9 +12,9 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel, validator
 
-from src.extraction_testing.models import RunContext, ResultBundle
-from src.extraction_testing.config import RunConfig
-from src.extraction_testing.utils import ensure_directory
+from .models import RunContext, ResultBundle
+from .config import RunConfig
+from .utils import ensure_directory
 
 
 # =========================

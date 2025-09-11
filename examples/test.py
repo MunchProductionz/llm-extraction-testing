@@ -2,15 +2,15 @@ from typing import List, Optional, Dict
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 
-from src.extraction_testing.config import (
+from extraction_testing.config import (
     TaskType,
     FeatureRule,
     MatchingConfig,
     ClassificationConfig,
     RunConfig,
 )
-from src.extraction_testing.orchestrator import build_run_context, evaluate
-from src.extraction_testing.logger import RunLogger
+from extraction_testing.orchestrator import build_run_context, evaluate
+from extraction_testing.logger import RunLogger
 
 
 # =========================

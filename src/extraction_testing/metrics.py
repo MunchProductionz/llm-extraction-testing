@@ -12,8 +12,8 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel, validator
 
-from src.extraction_testing.models import ConfusionCounts
-from src.extraction_testing.utils import normalize_label_for_metrics
+from .models import ConfusionCounts
+from .utils import normalize_label_for_metrics
 
 
 # =========================

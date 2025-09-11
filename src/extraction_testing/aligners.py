@@ -12,8 +12,8 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel, validator
 
-from src.extraction_testing.config import FeatureRule, MatchingConfig, RunConfig
-from src.extraction_testing.utils import values_are_equal, feature_similarity_score
+from .config import FeatureRule, MatchingConfig, RunConfig
+from .utils import values_are_equal, feature_similarity_score
 
 
 # =========================

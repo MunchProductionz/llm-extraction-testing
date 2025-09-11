@@ -12,16 +12,16 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel, validator
 
-from src.extraction_testing.config import RunConfig, ClassificationConfig, FeatureRule
-from src.extraction_testing.models import ResultBundle
-from src.extraction_testing.aligners import EntityAligner, IndexAligner
-from src.extraction_testing.metrics import (
+from .config import RunConfig, ClassificationConfig, FeatureRule
+from .models import ResultBundle
+from .aligners import EntityAligner, IndexAligner
+from .metrics import (
     compute_multiclass_metrics,
     make_per_feature_metrics_data_frame,
     make_total_metrics_data_frame,
     compute_row_accuracy
 )
-from src.extraction_testing.utils import (
+from .utils import (
     normalize_text,
     normalize_number,
     parse_date,
