@@ -12,16 +12,16 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel, validator
 
-from src.config import RunConfig, ClassificationConfig, FeatureRule
-from src.models import ResultBundle
-from src.aligners import EntityAligner, IndexAligner
-from src.metrics import (
+from src.extraction_testing.config import RunConfig, ClassificationConfig, FeatureRule
+from src.extraction_testing.models import ResultBundle
+from src.extraction_testing.aligners import EntityAligner, IndexAligner
+from src.extraction_testing.metrics import (
     compute_multiclass_metrics,
     make_per_feature_metrics_data_frame,
     make_total_metrics_data_frame,
     compute_row_accuracy
 )
-from src.utils import (
+from src.extraction_testing.utils import (
     normalize_text,
     normalize_number,
     parse_date,
@@ -35,7 +35,7 @@ from src.utils import (
 # Test Classes
 # =========================
 
-class BaseTest:
+class BaseEvaluator:
     """Base test class with common helpers."""
     def __init__(self, run_config: RunConfig):
         """Store configuration for the run."""
@@ -103,7 +103,7 @@ class BaseTest:
         }
 
 
-class EntityExtractionTest(BaseTest):
+class EntityExtractionTest(BaseEvaluator):
     """Entity extraction test with matching step before scoring."""
     def test(self, predicted_records: List[BaseModel], gold_records: List[BaseModel]) -> ResultBundle:
         """Run the entity extraction evaluation and return results."""
@@ -172,7 +172,7 @@ class EntityExtractionTest(BaseTest):
         )
 
 
-class MultiFeatureExtractionTest(BaseTest):
+class MultiFeatureExtractionTest(BaseEvaluator):
     """Multi-feature extraction test with indexed alignment."""
     def test(self, predicted_records: List[BaseModel], gold_records: List[BaseModel]) -> ResultBundle:
         """Run the multi-feature evaluation and return results."""
@@ -214,7 +214,7 @@ class MultiFeatureExtractionTest(BaseTest):
         )
 
 
-class ClassificationTest(BaseTest):
+class ClassificationTest(BaseEvaluator):
     """Classification test as a single-feature indexed case."""
     def test(self, predicted_records: List[BaseModel], gold_records: List[BaseModel]) -> ResultBundle:
         """Run the classification evaluation and return results."""

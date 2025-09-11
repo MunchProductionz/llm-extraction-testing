@@ -12,8 +12,8 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel, validator
 
-from src.config import FeatureRule
-from src.config import MISSING_LABEL_SENTINEL
+from src.extraction_testing.config import FeatureRule
+from src.extraction_testing.config import MISSING_LABEL_SENTINEL
 
 
 # =========================

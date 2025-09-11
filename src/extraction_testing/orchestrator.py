@@ -12,10 +12,10 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel, validator
 
-from src.config import RunConfig, TaskType
-from src.models import ResultBundle, RunContext
-from src.tests import EntityExtractionTest, MultiFeatureExtractionTest, ClassificationTest
-from src.utils import timestamp_string, hash_configuration
+from src.extraction_testing.config import RunConfig, TaskType
+from src.extraction_testing.models import ResultBundle, RunContext
+from src.extraction_testing.tests import EntityExtractionTest, MultiFeatureExtractionTest, ClassificationTest
+from src.extraction_testing.utils import timestamp_string, hash_configuration
 
 
 
