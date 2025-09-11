@@ -211,3 +211,4 @@ __marimo__/
 venv/
 .env
 logs/
+_viz_out/
