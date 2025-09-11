@@ -12,22 +12,23 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel, validator
 
-from src.config import RunConfig, FeatureRule, ClassificationConfig
-from src.aligners import IndexAligner, EntityAligner
+from src.config import RunConfig, ClassificationConfig, FeatureRule
 from src.models import ResultBundle
-from src.metrics import compute_multiclass_metrics, compute_row_accuracy
+from src.aligners import EntityAligner, IndexAligner
+from src.metrics import (
+    compute_multiclass_metrics,
+    make_per_feature_metrics_data_frame,
+    make_total_metrics_data_frame,
+    compute_row_accuracy
+)
 from src.utils import (
-    record_list_to_data_frame,
     normalize_text,
     normalize_number,
     parse_date,
     apply_alias_map,
-    values_are_equal,
-    make_per_feature_metrics_data_frame,
-    make_total_metrics_data_frame,
+    record_list_to_data_frame,
+    values_are_equal
 )
-
-
 
 
 # =========================
