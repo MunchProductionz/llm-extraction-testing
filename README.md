@@ -1,8 +1,34 @@
 # Extraction Testing Framework
 
-A small, typed framework to evaluate pipeline outputs (entity extraction, multi-feature extraction, and classification) against gold data. It aligns predictions to gold, normalizes values (text/number/date/category), computes macro metrics per feature, aggregates totals, and writes timestamped logs.
+A small, typed framework to evaluate pipeline outputs for single-feature, single-entity, and multi-entity extraction tasks against gold data. It aligns predictions to gold, normalizes values (text/number/date/category), computes macro metrics per feature, aggregates totals, and writes timestamped logs.
 
 ## Install
+
+Using `uv`:
+
+```bash
+uv sync
+```
+
+For local development with tests and tooling:
+
+```bash
+uv sync --extra dev
+```
+
+For demo/example dependencies such as Streamlit:
+
+```bash
+uv sync --extra examples
+```
+
+You can then run the test suite with:
+
+```bash
+uv run pytest
+```
+
+Using `pip`:
 
 ```bash
 pip install -e .
@@ -30,7 +56,7 @@ feature_rules = [
 
 # Configure the run
 run_config = RunConfig(
-    task_type=TaskType.ENTITY_EXTRACTION,
+    task_type=TaskType.MULTI_ENTITY,
     feature_rules=feature_rules,
     matching_config=MatchingConfig(matching_mode="weighted", minimum_similarity_threshold=0.6),
     log_directory_path="./logs",
@@ -52,9 +78,9 @@ print("Log:", log_path)
 1. **Adapt:** Convert lists of Pydantic models (predicted/gold) to DataFrames.  
 2. **Normalize:** Apply feature-specific normalization (text case/punctuation; numeric rounding & tolerances; date parsing & day window; category aliasing).  
 3. **Align:**  
-   - **Entity extraction:** Weighted similarity + threshold; one-to-one greedy matching with deterministic tie-breakers.  
-   - **Indexed tasks:** Exact join on `index_key_name`.  
-4. **Metrics:** Compute per-feature macro precision/recall/F1/specificity, micro accuracy, and row accuracy (all features correct). Entity extraction also reports entity presence precision/recall/F1.  
+   - **Multi-entity tasks:** Weighted similarity + threshold; one-to-one greedy matching with deterministic tie-breakers.  
+   - **Single-feature and single-entity tasks:** Exact join on `index_key_name`.  
+4. **Metrics:** Compute per-feature macro precision/recall/F1/specificity, micro accuracy, and row accuracy (all features correct). Multi-entity evaluation also reports entity presence precision/recall/F1.  
 5. **Aggregate & Log:** Produce tidy DataFrames and a timestamped `.txt` summary.
 
 ## Folder structure (what each file contains)
@@ -68,7 +94,7 @@ src/
    ├─ utils.py                 # adapters & predicates: normalize/alias/parse/missing/similarity
    ├─ aligners.py              # IndexAligner, EntityAligner, compute_pair_similarity
    ├─ metrics.py               # confusion counts, macro/micro metrics, row accuracy
-   ├─ evaluators.py            # EntityExtractionEvaluator, MultiFeatureExtractionEvaluator, ClassificationEvaluator
+   ├─ tests.py                 # MultiEntityExtractionTest, SingleEntityExtractionTest, SingleFeatureExtractionTest
    ├─ orchestrator.py          # build_run_context, evaluate
    └─ logger.py                # RunLogger
 examples/
@@ -94,7 +120,7 @@ tests/                         # pytest unit tests and fixtures
 | Micro Accuracy | Correct / Total | Overall correctness at the label level | Across all rows and features, fraction of exact label matches | Overall label correctness is high | Many label mismatches |
 | Row Accuracy | Rows with all features correct / Rows | Strict per-row correctness | A contract row counts “correct” only if **every** tested feature matches | Model gets entire rows right | One wrong feature spoils the row |
 
-### Entity extraction: entity presence metrics
+### Multi-entity extraction: entity presence metrics
 
 For entity detection (matching predicted entities to gold), we also report:
 
@@ -137,7 +163,7 @@ print(paths)
 |---|---|
 | `plot_total_metrics_bar(result_bundle)` | Bar chart of total precision, recall, F1, specificity, micro accuracy, and row accuracy (if present). |
 | `plot_per_feature_metrics_bar(result_bundle, metric_name="f1")` | Per-feature bar chart for the selected metric; deterministic sorting. |
-| `plot_entity_presence_summary(result_bundle)` | Entity presence precision/recall/F1 (entity extraction only); shows a note if not available. |
+| `plot_entity_presence_summary(result_bundle)` | Entity presence precision/recall/F1 (multi-entity tasks only); shows a note if not available. |
 | `plot_confusion_matrix_for_classification(gold, pred, class_names)` | Confusion matrix heatmap for classification labels. |
 | `plot_metric_by_group(per_feature_df, group_col, metric_name)` | Optional helper to aggregate and visualize a metric by groups after you’ve joined group labels. |
 | `save_all_charts_to_report(result_bundle, output_dir)` | Saves a timestamped folder with standard charts and returns a mapping of chart→file path. |
@@ -146,14 +172,21 @@ print(paths)
 
 Run the example after installing the package:
 
-```python
+```bash
 python examples/visualize_results.py
 ```
 
 It writes PNGs to ./_viz_out. For an interactive demo, you can also try the Streamlit app:
 
-```python
+```bash
 streamlit run examples/streamlit_app.py
+```
+
+With `uv`, the equivalent commands are:
+
+```bash
+uv run python examples/visualize_results.py
+uv run streamlit run examples/streamlit_app.py
 ```
 
 ### Notes
@@ -165,7 +198,7 @@ streamlit run examples/streamlit_app.py
 
 ## Roadmap
 
-- Hungarian assignment as an alternate aligner for entity extraction.  
+- Hungarian assignment as an alternate aligner for multi-entity extraction.  
 - JSON structured logs alongside `.txt`.  
 - Visualization helpers (cohort plots, confusion heatmaps).  
 - Strict Pydantic v2 typing helpers and plugin hooks.
