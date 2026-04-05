@@ -10,7 +10,7 @@ import hashlib
 
 import pandas as pd
 import numpy as np
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 
 from .config import FeatureRule
 from .config import MISSING_LABEL_SENTINEL
@@ -19,6 +19,12 @@ from .config import MISSING_LABEL_SENTINEL
 # =========================
 # Utility Functions
 # =========================
+
+def model_to_dict(model: BaseModel) -> Dict[str, Any]:
+    """Convert a Pydantic model to a plain dict across Pydantic versions."""
+    if hasattr(model, "model_dump"):
+        return model.model_dump()
+    return model.dict()
 
 def ensure_directory(directory_path_string: str) -> None:
     """Ensure a directory exists."""
@@ -40,7 +46,7 @@ def _flatten_config_for_hashing(object_value: Any, key_prefix: str = "") -> List
         for index, inner_value in enumerate(object_value):
             flattened_items.extend(_flatten_config_for_hashing(inner_value, key_prefix + f"{index}."))
     elif isinstance(object_value, BaseModel):
-        flattened_items.extend(_flatten_config_for_hashing(object_value.dict(), key_prefix))
+        flattened_items.extend(_flatten_config_for_hashing(model_to_dict(object_value), key_prefix))
     else:
         flattened_items.append((key_prefix.rstrip("."), object_value))
     return flattened_items
@@ -56,10 +62,8 @@ def record_list_to_data_frame(record_list: List[BaseModel]) -> pd.DataFrame:
     """Convert a list of Pydantic models to a pandas DataFrame."""
     rows: List[Dict[str, Any]] = []
     for record in record_list:
-        if hasattr(record, "model_dump"):
-            rows.append(record.model_dump())
-        elif hasattr(record, "dict"):
-            rows.append(record.dict())
+        if isinstance(record, BaseModel):
+            rows.append(model_to_dict(record))
         else:
             rows.append(dict(record))
     return pd.DataFrame(rows)

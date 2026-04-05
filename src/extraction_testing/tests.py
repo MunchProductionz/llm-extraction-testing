@@ -103,10 +103,10 @@ class BaseEvaluator:
         }
 
 
-class EntityExtractionTest(BaseEvaluator):
-    """Entity extraction test with matching step before scoring."""
+class MultiEntityExtractionTest(BaseEvaluator):
+    """Multi-entity extraction test with matching step before scoring."""
     def test(self, predicted_records: List[BaseModel], gold_records: List[BaseModel]) -> ResultBundle:
-        """Run the entity extraction evaluation and return results."""
+        """Run the multi-entity evaluation and return results."""
         predicted_data_frame = record_list_to_data_frame(predicted_records)
         gold_data_frame = record_list_to_data_frame(gold_records)
 
@@ -172,12 +172,12 @@ class EntityExtractionTest(BaseEvaluator):
         )
 
 
-class MultiFeatureExtractionTest(BaseEvaluator):
-    """Multi-feature extraction test with indexed alignment."""
+class SingleEntityExtractionTest(BaseEvaluator):
+    """Single-entity extraction test with indexed alignment."""
     def test(self, predicted_records: List[BaseModel], gold_records: List[BaseModel]) -> ResultBundle:
-        """Run the multi-feature evaluation and return results."""
+        """Run the single-entity evaluation and return results."""
         if not self.run_config.index_key_name:
-            raise ValueError("index_key_name must be specified for multi-feature extraction.")
+            raise ValueError("index_key_name must be specified for single-entity extraction.")
         predicted_data_frame = record_list_to_data_frame(predicted_records)
         gold_data_frame = record_list_to_data_frame(gold_records)
 
@@ -214,12 +214,12 @@ class MultiFeatureExtractionTest(BaseEvaluator):
         )
 
 
-class ClassificationTest(BaseEvaluator):
-    """Classification test as a single-feature indexed case."""
+class SingleFeatureExtractionTest(BaseEvaluator):
+    """Single-feature extraction test as an indexed one-feature case."""
     def test(self, predicted_records: List[BaseModel], gold_records: List[BaseModel]) -> ResultBundle:
-        """Run the classification evaluation and return results."""
+        """Run the single-feature evaluation and return results."""
         if not self.run_config.index_key_name:
-            raise ValueError("index_key_name must be specified for classification.")
+            raise ValueError("index_key_name must be specified for single-feature extraction.")
         predicted_data_frame = record_list_to_data_frame(predicted_records)
         gold_data_frame = record_list_to_data_frame(gold_records)
 
@@ -236,7 +236,7 @@ class ClassificationTest(BaseEvaluator):
         gold_aligned_data_frame = pd.DataFrame(gold_aligned_rows).reset_index(drop=True)
 
         if len(self.run_config.feature_rules) != 1:
-            raise ValueError("ClassificationTest expects exactly one feature rule.")
+            raise ValueError("SingleFeatureExtractionTest expects exactly one feature rule.")
 
         feature_rule = self.run_config.feature_rules[0]
         gold_labels = self.normalize_series_for_labels(gold_aligned_data_frame[feature_rule.feature_name], feature_rule)

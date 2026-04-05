@@ -18,7 +18,7 @@ from extraction_testing.logger import RunLogger
 # =========================
 
 class ContractRecord(BaseModel):
-    """Contract entity with multiple features for entity extraction tests."""
+    """Contract entity with multiple features for multi-entity tests."""
     contract_title: str
     contract_amount: Optional[float]   # Optional to allow None
     contract_date: Optional[str]       # Optional to allow None/""
@@ -27,7 +27,7 @@ class ContractRecord(BaseModel):
 
 
 class ArticleFeaturesRecord(BaseModel):
-    """Article with multiple features for multi-feature extraction tests."""
+    """Article with multiple features for single-entity tests."""
     row_identifier: int
     headline_text: Optional[str]
     author_name: Optional[str]
@@ -37,7 +37,7 @@ class ArticleFeaturesRecord(BaseModel):
 
 
 class ArticleLabelRecord(BaseModel):
-    """Article with single classification label."""
+    """Article with a single extracted feature."""
     row_identifier: int
     topic_label: Optional[str]
     source_name: Optional[str] = None
@@ -57,7 +57,7 @@ def make_date_string(days_offset: int) -> str:
 # Base datasets from earlier conversation
 # -----------------------------------------
 
-def build_entity_extraction_gold() -> List[ContractRecord]:
+def build_multi_entity_gold() -> List[ContractRecord]:
     """Create a list of gold ContractRecord instances."""
     base = [
         ContractRecord(contract_title="Supply Agreement Alpha",    contract_amount=100000.0, contract_date=make_date_string(0), currency_code="USD", sector_name="Energy"),
@@ -78,7 +78,7 @@ def build_entity_extraction_gold() -> List[ContractRecord]:
     return base
 
 
-def build_entity_extraction_predictions() -> List[ContractRecord]:
+def build_multi_entity_predictions() -> List[ContractRecord]:
     """Create predicted ContractRecord instances with edge cases."""
     base = [
         # Text normalization differences + currency alias
@@ -110,7 +110,7 @@ def build_entity_extraction_predictions() -> List[ContractRecord]:
     return base
 
 
-def build_multi_feature_gold() -> List[ArticleFeaturesRecord]:
+def build_single_entity_gold() -> List[ArticleFeaturesRecord]:
     """Create indexed gold article feature records."""
     base = [
         ArticleFeaturesRecord(row_identifier=1, headline_text="Breaking: Market Rally", author_name="John Smith", view_count=1000, publish_date=make_date_string(0), source_name="NewsNet"),
@@ -128,7 +128,7 @@ def build_multi_feature_gold() -> List[ArticleFeaturesRecord]:
     return base
 
 
-def build_multi_feature_predictions() -> List[ArticleFeaturesRecord]:
+def build_single_entity_predictions() -> List[ArticleFeaturesRecord]:
     """Create predicted article feature records with common errors + optional cases."""
     base = [
         # Text punctuation/case differences, minor numeric error inside tolerance, date exact
@@ -155,8 +155,8 @@ def build_multi_feature_predictions() -> List[ArticleFeaturesRecord]:
     return base
 
 
-def build_classification_gold() -> List[ArticleLabelRecord]:
-    """Create gold classification labels with class imbalance."""
+def build_single_feature_gold() -> List[ArticleLabelRecord]:
+    """Create gold single-feature labels with class imbalance."""
     return [
         ArticleLabelRecord(row_identifier=1, topic_label="business", source_name="NewsNet"),
         ArticleLabelRecord(row_identifier=2, topic_label="tech",     source_name="NewsNet"),
@@ -167,8 +167,8 @@ def build_classification_gold() -> List[ArticleLabelRecord]:
     ]
 
 
-def build_classification_predictions() -> List[ArticleLabelRecord]:
-    """Create predicted classification labels with plausible confusions."""
+def build_single_feature_predictions() -> List[ArticleLabelRecord]:
+    """Create predicted single-feature labels with plausible confusions."""
     return [
         ArticleLabelRecord(row_identifier=1, topic_label="business",   source_name="NewsNet"),
         ArticleLabelRecord(row_identifier=2, topic_label="technology", source_name="NewsNet"),  # alias of 'tech'
@@ -183,8 +183,8 @@ def build_classification_predictions() -> List[ArticleLabelRecord]:
 # Build configurations
 # =========================
 
-def build_entity_run_config() -> RunConfig:
-    """Build RunConfig for entity extraction."""
+def build_multi_entity_run_config() -> RunConfig:
+    """Build RunConfig for multi-entity extraction."""
     contract_feature_rules = [
         FeatureRule(feature_name="contract_title",  feature_type="text",    weight_for_matching=2.0),
         FeatureRule(feature_name="contract_amount", feature_type="number",  numeric_absolute_tolerance=100.0, numeric_rounding_digits=0, weight_for_matching=1.5),
@@ -193,7 +193,7 @@ def build_entity_run_config() -> RunConfig:
     ]
     matching_config = MatchingConfig(matching_mode="weighted", minimum_similarity_threshold=0.6)
     return RunConfig(
-        task_type=TaskType.ENTITY_EXTRACTION,
+        task_type=TaskType.MULTI_ENTITY,
         feature_rules=contract_feature_rules,
         index_key_name=None,
         matching_config=matching_config,
@@ -201,8 +201,8 @@ def build_entity_run_config() -> RunConfig:
     )
 
 
-def build_multi_run_config() -> RunConfig:
-    """Build RunConfig for multi-feature extraction."""
+def build_single_entity_run_config() -> RunConfig:
+    """Build RunConfig for single-entity extraction."""
     article_feature_rules = [
         FeatureRule(feature_name="headline_text", feature_type="text"),
         FeatureRule(feature_name="author_name",   feature_type="text", alias_map={"J. Smith": "John Smith", "Jane D.": "Jane Doe", "Coach A.": "A. Coach"}),
@@ -210,24 +210,24 @@ def build_multi_run_config() -> RunConfig:
         FeatureRule(feature_name="publish_date",  feature_type="date", date_tolerance_days=1),
     ]
     return RunConfig(
-        task_type=TaskType.MULTI_FEATURE,
+        task_type=TaskType.SINGLE_ENTITY,
         feature_rules=article_feature_rules,
         index_key_name="row_identifier",
         log_directory_path="./logs",
     )
 
 
-def build_classification_run_config() -> RunConfig:
-    """Build RunConfig for classification."""
-    classification_feature_rules = [
+def build_single_feature_run_config() -> RunConfig:
+    """Build RunConfig for single-feature extraction."""
+    single_feature_rules = [
         FeatureRule(feature_name="topic_label", feature_type="category", alias_map={"technology": "tech"})
     ]
-    classification_config = ClassificationConfig(positive_label=None, average_strategy="macro")
+    single_feature_metrics_config = ClassificationConfig(positive_label=None, average_strategy="macro")
     return RunConfig(
-        task_type=TaskType.CLASSIFICATION,
-        feature_rules=classification_feature_rules,
+        task_type=TaskType.SINGLE_FEATURE,
+        feature_rules=single_feature_rules,
         index_key_name="row_identifier",
-        classification_config=classification_config,
+        classification_config=single_feature_metrics_config,
         log_directory_path="./logs",
     )
 
@@ -239,80 +239,80 @@ def build_classification_run_config() -> RunConfig:
 def main() -> None:
     """Run all three synthetic evaluations against the split testing framework."""
     # Build datasets (now include optional-field cases)
-    entity_gold_records = build_entity_extraction_gold()
-    entity_predicted_records = build_entity_extraction_predictions()
+    multi_entity_gold_records = build_multi_entity_gold()
+    multi_entity_predicted_records = build_multi_entity_predictions()
 
-    multi_gold_records = build_multi_feature_gold()
-    multi_predicted_records = build_multi_feature_predictions()
+    single_entity_gold_records = build_single_entity_gold()
+    single_entity_predicted_records = build_single_entity_predictions()
 
-    class_gold_records = build_classification_gold()
-    class_predicted_records = build_classification_predictions()
+    single_feature_gold_records = build_single_feature_gold()
+    single_feature_predicted_records = build_single_feature_predictions()
 
     # Build configurations
-    entity_run_config = build_entity_run_config()
-    multi_run_config = build_multi_run_config()
-    classification_run_config = build_classification_run_config()
+    multi_entity_run_config = build_multi_entity_run_config()
+    single_entity_run_config = build_single_entity_run_config()
+    single_feature_run_config = build_single_feature_run_config()
 
-    # Run Entity Extraction
-    entity_run_context = build_run_context(entity_run_config)
-    entity_result_bundle = evaluate(entity_predicted_records, entity_gold_records, entity_run_config)
-    entity_log_path = RunLogger(entity_run_config.log_directory_path).write_log(
-        entity_run_context,
-        entity_result_bundle,
-        entity_run_config,
-        note_message="Entity extraction synthetic run (includes optional-number/date cases)."
+    # Run Multi-Entity Extraction
+    multi_entity_run_context = build_run_context(multi_entity_run_config)
+    multi_entity_result_bundle = evaluate(multi_entity_predicted_records, multi_entity_gold_records, multi_entity_run_config)
+    multi_entity_log_path = RunLogger(multi_entity_run_config.log_directory_path).write_log(
+        multi_entity_run_context,
+        multi_entity_result_bundle,
+        multi_entity_run_config,
+        note_message="Multi-entity synthetic run (includes optional-number/date cases)."
     )
 
-    print("\n=== ENTITY EXTRACTION RESULTS ===")
+    print("\n=== MULTI-ENTITY RESULTS ===")
     print("Total Metrics:")
-    print(entity_result_bundle.total_metrics_data_frame.to_string(index=False))
+    print(multi_entity_result_bundle.total_metrics_data_frame.to_string(index=False))
     print("\nPer-Feature Metrics:")
-    print(entity_result_bundle.per_feature_metrics_data_frame.to_string(index=False))
-    print(f"\nRow Accuracy: {entity_result_bundle.row_accuracy_value:.4f}")
-    if entity_result_bundle.entity_detection_summary:
+    print(multi_entity_result_bundle.per_feature_metrics_data_frame.to_string(index=False))
+    print(f"\nRow Accuracy: {multi_entity_result_bundle.row_accuracy_value:.4f}")
+    if multi_entity_result_bundle.entity_detection_summary:
         print("\nEntity Detection Summary:")
-        for key, value in entity_result_bundle.entity_detection_summary.items():
+        for key, value in multi_entity_result_bundle.entity_detection_summary.items():
             print(f"{key}: {value}")
-    if entity_result_bundle.matched_pairs_data_frame is not None:
+    if multi_entity_result_bundle.matched_pairs_data_frame is not None:
         print("\nMatched Pairs (first 12):")
-        print(entity_result_bundle.matched_pairs_data_frame.head(12).to_string(index=False))
-    print(f"\nLog written to: {entity_log_path}")
+        print(multi_entity_result_bundle.matched_pairs_data_frame.head(12).to_string(index=False))
+    print(f"\nLog written to: {multi_entity_log_path}")
 
-    # Run Multi-Feature Extraction
-    multi_run_context = build_run_context(multi_run_config)
-    multi_result_bundle = evaluate(multi_predicted_records, multi_gold_records, multi_run_config)
-    multi_log_path = RunLogger(multi_run_config.log_directory_path).write_log(
-        multi_run_context,
-        multi_result_bundle,
-        multi_run_config,
-        note_message="Multi-feature synthetic run (includes optional-number/date cases)."
+    # Run Single-Entity Extraction
+    single_entity_run_context = build_run_context(single_entity_run_config)
+    single_entity_result_bundle = evaluate(single_entity_predicted_records, single_entity_gold_records, single_entity_run_config)
+    single_entity_log_path = RunLogger(single_entity_run_config.log_directory_path).write_log(
+        single_entity_run_context,
+        single_entity_result_bundle,
+        single_entity_run_config,
+        note_message="Single-entity synthetic run (includes optional-number/date cases)."
     )
 
-    print("\n=== MULTI-FEATURE EXTRACTION RESULTS ===")
+    print("\n=== SINGLE-ENTITY RESULTS ===")
     print("Total Metrics:")
-    print(multi_result_bundle.total_metrics_data_frame.to_string(index=False))
+    print(single_entity_result_bundle.total_metrics_data_frame.to_string(index=False))
     print("\nPer-Feature Metrics:")
-    print(multi_result_bundle.per_feature_metrics_data_frame.to_string(index=False))
-    print(f"\nRow Accuracy: {multi_result_bundle.row_accuracy_value:.4f}")
-    print(f"\nLog written to: {multi_log_path}")
+    print(single_entity_result_bundle.per_feature_metrics_data_frame.to_string(index=False))
+    print(f"\nRow Accuracy: {single_entity_result_bundle.row_accuracy_value:.4f}")
+    print(f"\nLog written to: {single_entity_log_path}")
 
-    # Run Classification
-    classification_run_context = build_run_context(classification_run_config)
-    classification_result_bundle = evaluate(class_predicted_records, class_gold_records, classification_run_config)
-    classification_log_path = RunLogger(classification_run_config.log_directory_path).write_log(
-        classification_run_context,
-        classification_result_bundle,
-        classification_run_config,
-        note_message="Classification synthetic run."
+    # Run Single-Feature Extraction
+    single_feature_run_context = build_run_context(single_feature_run_config)
+    single_feature_result_bundle = evaluate(single_feature_predicted_records, single_feature_gold_records, single_feature_run_config)
+    single_feature_log_path = RunLogger(single_feature_run_config.log_directory_path).write_log(
+        single_feature_run_context,
+        single_feature_result_bundle,
+        single_feature_run_config,
+        note_message="Single-feature synthetic run."
     )
 
-    print("\n=== CLASSIFICATION RESULTS ===")
+    print("\n=== SINGLE-FEATURE RESULTS ===")
     print("Total Metrics:")
-    print(classification_result_bundle.total_metrics_data_frame.to_string(index=False))
+    print(single_feature_result_bundle.total_metrics_data_frame.to_string(index=False))
     print("\nPer-Feature Metrics:")
-    print(classification_result_bundle.per_feature_metrics_data_frame.to_string(index=False))
-    print(f"\nRow Accuracy: {classification_result_bundle.row_accuracy_value:.4f}")
-    print(f"\nLog written to: {classification_log_path}")
+    print(single_feature_result_bundle.per_feature_metrics_data_frame.to_string(index=False))
+    print(f"\nRow Accuracy: {single_feature_result_bundle.row_accuracy_value:.4f}")
+    print(f"\nLog written to: {single_feature_log_path}")
 
     print("\nAll logs are available in ./logs")
 
