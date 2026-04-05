@@ -2,6 +2,35 @@
 
 A small, typed framework to evaluate pipeline outputs for single-feature, single-entity, and multi-entity extraction tasks against gold data. It aligns predictions to gold, normalizes values (text/number/date/category), computes macro metrics per feature, aggregates totals, and writes timestamped logs.
 
+## Why this library exists
+
+This library is built for evaluation-driven development (EDD): the idea that extraction and classification workflows should be improved through a repeatable loop of gold-set design, implementation, evaluation, error review, and iteration.
+
+In many real projects, building the first workflow is not the hardest part. The harder part is setting up the evaluation layer around it quickly enough that the team actually keeps the discipline to measure performance, inspect mistakes, and improve behavior over time. That problem becomes even sharper when the workflow depends on domain knowledge the developer does not have directly, but a domain expert can provide in limited bursts.
+
+The typical loop looks like this:
+
+1. Define a representative gold test set with a domain expert.
+2. Build a baseline workflow or pipeline.
+3. Compare predictions against the gold data, calculate metrics, and visualize the results.
+4. Review grouped mistakes, refine the workflow, and repeat.
+
+This library is intended to standardize step 3. Instead of rebuilding comparison logic, metrics code, logging, and visualization for every project, you can focus on:
+
+1. defining the test set correctly
+2. building the workflow itself
+3. using this library to evaluate predictions against the gold set
+
+That lowers the cost of doing EDD and makes it easier to balance speed and quality in production-oriented development.
+
+Example task shapes include:
+
+- one label per text, such as sentiment or routing class: `SINGLE_FEATURE`
+- one structured object per record, such as key fields from an article: `SINGLE_ENTITY`
+- multiple entities per source, such as contracts extracted from a report: `MULTI_ENTITY`
+
+The most important design work still lives in the test set. That is where intended behavior, definitions, and useful biases are encoded for the task.
+
 ## Install
 
 Using `uv`:

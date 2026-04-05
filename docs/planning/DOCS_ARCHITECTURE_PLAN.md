@@ -30,13 +30,13 @@ The documentation should also be usable by AI agents. That means:
 
 As of 2026-04-05, the repository has:
 
-- `README.md` with installation, quickstart, metrics overview, and visualization notes
+- `README.md` with installation, quickstart, metrics overview, visualization notes, and motivation
 - `AGENTS.md` with repository guidance for AI agents
+- a structured MkDocs documentation site in `docs/`
+- concept, how-to, reference, contributor, and planning pages
 - docstrings in the Python source
-- no docs site scaffolding yet
-- no `docs/` content for a browser-based documentation site yet, besides this planning area
 
-This means the next phase is not "improve existing docs structure", but "create the first structured docs site intentionally".
+This means future work should focus on maintaining alignment between the code and the existing docs structure, not on inventing a new documentation layout.
 
 ## Recommended Tooling
 
@@ -83,6 +83,7 @@ docs/
     quickstart.md
     task-selection.md
   concepts/
+    evaluation-driven-development.md
     task-types.md
     feature-rules.md
     run-config.md
@@ -132,6 +133,7 @@ Getting Started
   Quickstart
   Choosing a Task Type
 Concepts
+  Why This Library Exists
   Task Types
   Feature Rules
   Run Config
@@ -207,6 +209,16 @@ Must include:
 - what alignment strategy each uses
 - whether `index_key_name` is required
 - whether entity presence metrics apply
+
+### `concepts/evaluation-driven-development.md`
+
+Must include:
+
+- the practical motivation for the library
+- a concise explanation of evaluation-driven development
+- the role of domain experts and gold-set design
+- what work the library standardizes vs what it does not replace
+- example mappings from real tasks to `SINGLE_FEATURE`, `SINGLE_ENTITY`, and `MULTI_ENTITY`
 
 ### `concepts/feature-rules.md`
 
