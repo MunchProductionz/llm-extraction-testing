@@ -1,0 +1,64 @@
+site_name: extraction-testing
+site_description: Documentation for the extraction-testing evaluation library.
+repo_name: extraction-testing
+docs_dir: docs
+strict: true
+theme:
+  name: material
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths:
+            - src
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+  - javascripts/mermaid-init.js
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quickstart: getting-started/quickstart.md
+      - Choosing a Task Type: getting-started/task-selection.md
+  - Concepts:
+      - Why This Library Exists: concepts/evaluation-driven-development.md
+      - Task Types: concepts/task-types.md
+      - Feature Rules: concepts/feature-rules.md
+      - Run Config: concepts/run-config.md
+      - Alignment: concepts/alignment.md
+      - Metrics: concepts/metrics.md
+      - Logging: concepts/logging.md
+      - Visualization: concepts/visualization.md
+  - How-To Guides:
+      - Evaluate a Single-Feature Task: how-to/evaluate-single-feature.md
+      - Evaluate a Single-Entity Task: how-to/evaluate-single-entity.md
+      - Evaluate a Multi-Entity Task: how-to/evaluate-multi-entity.md
+      - Configure Feature Rules: how-to/configure-feature-rules.md
+      - Interpret Results: how-to/interpret-results.md
+      - Save Logs: how-to/save-logs.md
+      - Generate Visualizations: how-to/generate-visualizations.md
+  - API Reference:
+      - Overview: reference/overview.md
+      - config: reference/config.md
+      - orchestrator: reference/orchestrator.md
+      - logger: reference/logger.md
+      - visualization: reference/visualization.md
+      - models: reference/models.md
+  - Contributor Docs:
+      - Documentation Style Guide: contributor/docs-style-guide.md
+      - Documentation Maintenance: contributor/docs-maintenance.md
+      - AI Handoff: contributor/ai-handoff.md
+  - Planning:
+      - Docs Architecture Plan: planning/DOCS_ARCHITECTURE_PLAN.md
+      - Docs Progress: planning/DOCS_PROGRESS.md
