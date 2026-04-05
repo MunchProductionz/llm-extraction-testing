@@ -1,8 +1,8 @@
-# Extraction Testing Framework
+# Extraction Testing Framework 🧪
 
 A small, typed framework to evaluate pipeline outputs for single-feature, single-entity, and multi-entity extraction tasks against gold data. It aligns predictions to gold, normalizes values (text/number/date/category), computes macro metrics per feature, aggregates totals, and writes timestamped logs.
 
-## Why this library exists
+## Why this library exists 💡
 
 This library is built for evaluation-driven development (EDD): the idea that extraction and classification workflows should be improved through a repeatable loop of gold-set design, implementation, evaluation, error review, and iteration.
 
@@ -31,7 +31,7 @@ Example task shapes include:
 
 The most important design work still lives in the test set. That is where intended behavior, definitions, and useful biases are encoded for the task.
 
-## Install
+## Install ⚙️
 
 Using `uv`:
 
@@ -68,7 +68,7 @@ If you are using a fresh virtual environment, install dev extras for linting and
 pip install -e ".[dev]"
 ```
 
-## Quickstart
+## Quickstart 🚀
 
 ```python
 from extraction_testing.config import TaskType, FeatureRule, RunConfig, MatchingConfig
@@ -102,7 +102,7 @@ print("Totals:\n", result_bundle.total_metrics_data_frame)
 print("Log:", log_path)
 ```
 
-## How it works
+## How it works 🔄
 
 1. **Adapt:** Convert lists of Pydantic models (predicted/gold) to DataFrames.  
 2. **Normalize:** Apply feature-specific normalization (text case/punctuation; numeric rounding & tolerances; date parsing & day window; category aliasing).  
@@ -112,7 +112,7 @@ print("Log:", log_path)
 4. **Metrics:** Compute per-feature macro precision/recall/F1/specificity, micro accuracy, and row accuracy (all features correct). Multi-entity evaluation also reports entity presence precision/recall/F1.  
 5. **Aggregate & Log:** Produce tidy DataFrames and a timestamped `.txt` summary.
 
-## Folder structure (what each file contains)
+## Folder structure (what each file contains) 🗂️
 
 ```
 src/
@@ -131,14 +131,14 @@ examples/
 tests/                         # pytest unit tests and fixtures
 ```
 
-## Configuration tips
+## Configuration tips 🛠️
 
 - **Optional fields:** If both predicted and gold are missing (`None`/unparsable), numbers and dates are treated as **equal**; text/category `None` is normalized to a sentinel for metrics accounting.  
 - **Tolerances:** Use `numeric_absolute_tolerance`, `numeric_relative_tolerance`, `numeric_rounding_digits`, and `date_tolerance_days` to control equality.  
 - **Alias maps:** Map synonyms (e.g., `"US Dollar" → "USD"`, `"technology" → "tech"`).  
 - **Determinism:** Entity matching tie-breakers use a fixed seed (`random_tie_breaker_seed`) for reproducibility.
 
-## Metrics (per-feature by default, macro-averaged over classes)
+## Metrics (per-feature by default, macro-averaged over classes) 📊
 
 | Metric | What it is | What it measures | Practical example | High value means | Low value means |
 |---|---|---|---|---|---|
@@ -149,7 +149,7 @@ tests/                         # pytest unit tests and fixtures
 | Micro Accuracy | Correct / Total | Overall correctness at the label level | Across all rows and features, fraction of exact label matches | Overall label correctness is high | Many label mismatches |
 | Row Accuracy | Rows with all features correct / Rows | Strict per-row correctness | A contract row counts “correct” only if **every** tested feature matches | Model gets entire rows right | One wrong feature spoils the row |
 
-### Multi-entity extraction: entity presence metrics
+### Multi-entity extraction: entity presence metrics 🧩
 
 For entity detection (matching predicted entities to gold), we also report:
 
@@ -161,11 +161,11 @@ For entity detection (matching predicted entities to gold), we also report:
 
 > Specificity does not apply to entity presence (there is no “true negative entity” set in a standard way), but per-feature specificity is still computed on aligned pairs.
 
-## Visualization
+## Visualization 📈
 
 The package includes an optional matplotlib-based visualization helper in `extraction_testing.visualization`. It produces simple, typed figures from a `ResultBundle` (no seaborn, one chart per figure) and can also save a small PNG report.
 
-### Quick start
+### Quick start 🚀
 
 ```python
 from extraction_testing.visualization import (
@@ -186,7 +186,7 @@ paths = save_all_charts_to_report(result, "./_viz_out")
 print(paths)
 ```
 
-### Available plotting functions
+### Available plotting functions 🧰
 
 | Function | Purpose |
 |---|---|
@@ -197,7 +197,7 @@ print(paths)
 | `plot_metric_by_group(per_feature_df, group_col, metric_name)` | Optional helper to aggregate and visualize a metric by groups after you’ve joined group labels. |
 | `save_all_charts_to_report(result_bundle, output_dir)` | Saves a timestamped folder with standard charts and returns a mapping of chart→file path. |
 
-### Example script
+### Example script 🖥️
 
 Run the example after installing the package:
 
@@ -218,20 +218,26 @@ uv run python examples/visualize_results.py
 uv run streamlit run examples/streamlit_app.py
 ```
 
-### Notes
+### Notes 📝
 
 - All figures use matplotlib defaults (no custom colors) and handle empty inputs by displaying a clear textual note.
 - The functions do not mutate global matplotlib state and close figures when saving reports.
 - Metric semantics match the testing framework (precision, recall, F1, specificity, micro accuracy); row accuracy is plotted if provided in the ResultBundle.
 
 
-## Roadmap
+## Roadmap 🛣️
 
 - Hungarian assignment as an alternate aligner for multi-entity extraction.  
 - JSON structured logs alongside `.txt`.  
 - Visualization helpers (cohort plots, confusion heatmaps).  
 - Strict Pydantic v2 typing helpers and plugin hooks.
 
-## License
+## License ⚖️
 
-MIT — see `LICENSE`.
+Apache License 2.0 — see `LICENSE`.
+
+| Category | Details |
+|---|---|
+| Permissions | Commercial use, Modification, Distribution, Patent use, Private use |
+| Limitations | Trademark use, Liability, Warranty |
+| Conditions | License and copyright notice, State changes |
